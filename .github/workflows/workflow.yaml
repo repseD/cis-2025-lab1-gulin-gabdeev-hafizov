@@ -63,18 +63,17 @@ jobs:
     - name: Collect all Allure results
       run: |
         mkdir -p allure-results
+        # Копируем результаты из frontend
         if [ -d "frontend/allure-results" ]; then
           cp -r frontend/allure-results/* allure-results/ || true
         fi
+        # Копируем результаты из backend (проверяем все возможные места)
         find backend -type d -name "allure-results" -not -path "*/node_modules/*" | while read dir; do
           if [ -d "$dir" ] && [ "$(ls -A $dir 2>/dev/null)" ]; then
             cp -r "$dir"/* allure-results/ || true
           fi
         done
         
-    - name: Generate Allure report
-      run: allure generate allure-results -o allure-report --clean
-      
     - name: Get Allure history from gh-pages
       if: always()
       continue-on-error: true
@@ -83,14 +82,14 @@ jobs:
         ref: gh-pages
         path: gh-pages
         
-    - name: Prepare Allure history
+    - name: Generate Allure Report with history
       if: always()
-      run: |
-        mkdir -p allure-history
-        if [ -d "gh-pages/history" ]; then
-          cp -r gh-pages/history allure-history/ || true
-        fi
-        cp -r allure-report/* allure-history/ || true
+      uses: simple-elf/allure-report-action@master
+      with:
+        allure_results: allure-results
+        allure_report: allure-report
+        gh_pages: gh-pages
+        allure_history: allure-history
         
     - name: Upload Allure Report
       if: always()
