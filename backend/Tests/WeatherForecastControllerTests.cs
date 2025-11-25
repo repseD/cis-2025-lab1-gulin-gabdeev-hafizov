@@ -14,7 +14,7 @@ public class WeatherForecastControllerTests
     [Test]
     public void Get_ReturnsWeatherForecasts()
     {
-        // Arrange
+        // Arrang
         var controller = new WeatherForecastController();
 
         // Act
